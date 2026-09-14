@@ -219,9 +219,3 @@ export const FORM_CONTENT = {
   commercialDisclaimer: "Condições comerciais personalizadas, sujeitas à análise e ao perfil da loja.",
   successMessage: "Cadastro enviado. Nossa equipe analisará os dados da sua loja e entrará em contato."
 };
-
-export const BRAZILIAN_STATES = [
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", 
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", 
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
-];

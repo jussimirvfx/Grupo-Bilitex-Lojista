@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Authority } from './components/Authority';
@@ -9,20 +8,16 @@ import { FAQ } from './components/FAQ';
 import { RegisterForm } from './components/RegisterForm';
 import { Footer } from './components/Footer';
 import { StickyMobileCTA } from './components/StickyMobileCTA';
-import { BrandInterest } from './types';
+import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 
 export default function App() {
-  const [selectedBrandPreference, setSelectedBrandPreference] = useState<BrandInterest>('As duas marcas');
-
-  const handleScrollToForm = (brandPreference?: BrandInterest) => {
-    if (brandPreference) {
-      setSelectedBrandPreference(brandPreference);
-    }
-    const formElement = document.getElementById('cadastro');
+  const handleScrollToForm = () => {
+    const formElement = document.getElementById('cta-form');
     if (formElement) {
       const yOffset = -80;
       const y = formElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
+      formElement.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
     }
   };
 
@@ -37,7 +32,7 @@ export default function App() {
         <Hero onCtaClick={() => handleScrollToForm()} />
 
         {/* Section 2: Brands & Collections (Bakulelê and Biliton) */}
-        <Collections onSelectBrandCTA={(brand) => handleScrollToForm(brand)} />
+        <Collections onSelectBrandCTA={() => handleScrollToForm()} />
 
         {/* Section 3: Authority Metrics */}
         <Authority />
@@ -52,7 +47,7 @@ export default function App() {
         <FAQ />
 
         {/* Section 7: B2B Registration Form */}
-        <RegisterForm selectedBrandPreference={selectedBrandPreference} />
+        <RegisterForm />
       </main>
 
       {/* Footer */}
@@ -60,6 +55,7 @@ export default function App() {
 
       {/* Sticky Mobile CTA Bar */}
       <StickyMobileCTA onCtaClick={() => handleScrollToForm()} />
+      <WhatsAppFloatingButton onCtaClick={handleScrollToForm} />
     </div>
   );
 }

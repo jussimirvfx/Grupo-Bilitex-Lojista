@@ -1,5 +1,3 @@
-export type StoreType = 'Boutique' | 'Multimarcas' | 'Loja de shopping' | 'Loja online' | 'Outro';
-
 export type BrandInterest = 'Bakulelê' | 'Biliton' | 'As duas marcas';
 
 export interface RegisterFormData {
@@ -7,13 +5,12 @@ export interface RegisterFormData {
   contactName: string;
   whatsapp: string;
   cnpj: string;
-  city: string;
-  state: string;
+  email: string;
+  hasPhysicalStore: string;
   instagram: string;
   brandsSold: string;
-  storeType: StoreType;
-  interestedBrand: BrandInterest;
-  agreedTerms: boolean;
+  storeType: string;
+  interestedBrand: string;
 }
 
 export interface FAQItem {

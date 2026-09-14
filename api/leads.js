@@ -1,10 +1,13 @@
 import {
   formatCNPJ,
-  isValidCNPJ,
   lookupCNPJ,
   normalizeCNPJ,
 } from '@jussimirvfx/cnpj-cascade';
 import { isSameOrigin } from '@jussimirvfx/cnpj-cascade/vercel';
+
+import { qualifyLead } from '../src/lib/leadQualification.js';
+import { validateLead } from '../src/lib/leadValidation.js';
+import { recordFormBackup } from './_lib/formBackup.js';
 
 const WEBHOOK_TIMEOUT_MS = 12_000;
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -75,8 +78,14 @@ export const buildLeadPayload = (body, cnpjLookup) => {
       ? cnpjLookup.fontes_consultadas
       : [],
     company,
-    city: String(body.city).trim(),
-    state: String(body.state).trim(),
+    ...qualifyLead(body, company),
+    email: String(body.email).trim(),
+    name: String(body.contactName).trim(),
+    phone: `+55${onlyDigits(body.whatsapp)}`,
+    country: 'BR',
+    content_name: 'Formulário de Contato',
+    content_category: 'Lead Generation',
+    hasPhysicalStore: body.hasPhysicalStore,
     instagram: String(body.instagram || '').trim(),
     brandsSold: String(body.brandsSold || '').trim(),
     storeType: String(body.storeType).trim(),
@@ -101,37 +110,31 @@ export default async function handler(req, res) {
   }
 
   const body = parseBody(req.body);
-  const requiredFields = [
-    'storeName',
-    'contactName',
-    'whatsapp',
-    'cnpj',
-    'city',
-    'state',
-    'storeType',
-    'interestedBrand',
-  ];
-  const hasRequiredFields = requiredFields.every((field) => String(body[field] || '').trim());
-  const whatsappDigits = onlyDigits(body.whatsapp);
-
-  if (!hasRequiredFields) {
-    return res.status(400).json({ ok: false, error: 'missing-required-fields' });
-  }
-  if (!isValidCNPJ(body.cnpj)) {
-    return res.status(400).json({ ok: false, error: 'invalid-cnpj' });
-  }
-  if (whatsappDigits.length !== 10 && whatsappDigits.length !== 11) {
-    return res.status(400).json({ ok: false, error: 'invalid-whatsapp' });
+  const errors = validateLead(body);
+  if (Object.keys(errors).length) {
+    return res.status(400).json({ ok: false, error: 'invalid-fields', errors });
   }
 
   const webhookURL = process.env.N8N_GRUPO_BILITEX_WEBHOOK_URL;
-  if (!webhookURL) {
-    return res.status(503).json({ ok: false, error: 'lead-service-unavailable' });
+  // A localização e a idade vêm da consulta do servidor, nunca do navegador.
+  let cnpjLookup;
+  try {
+    cnpjLookup = await lookupCNPJ(body.cnpj);
+  } catch {
+    cnpjLookup = { company: {}, motivo: 'Consulta cadastral indisponível', encontrado: false };
   }
-
-  // The server repeats the lookup so downstream data never trusts browser state.
-  const cnpjLookup = await lookupCNPJ(body.cnpj);
   const payload = buildLeadPayload(body, cnpjLookup);
+  const { city, state, tempoCnpj, cnpj_age_years, data_abertura, lead_score, value, currency,
+    lead_score_details, qualification_status, qualified, disqualified, disqualification_reasons,
+    qualification_pending_reasons, score_complete } = payload;
+  const scoring = { city, state, tempoCnpj, cnpj_age_years, data_abertura, lead_score, value, currency,
+    lead_score_details, qualification_status, qualified, disqualified, disqualification_reasons,
+    qualification_pending_reasons, score_complete };
+  await recordFormBackup(payload, req, { source: 'server-validated', webhookConfigured: Boolean(webhookURL) });
+  console.info(JSON.stringify({ msg: 'lead_scoring', ...scoring }));
+  if (!webhookURL) {
+    return res.status(503).json({ ok: false, error: 'lead-service-unavailable', scoring });
+  }
 
   try {
     const webhookResponse = await fetch(webhookURL, {
@@ -142,11 +145,11 @@ export default async function handler(req, res) {
     });
 
     if (!webhookResponse.ok) {
-      return res.status(502).json({ ok: false, error: 'lead-service-unavailable' });
+      return res.status(502).json({ ok: false, error: 'lead-service-unavailable', scoring });
     }
   } catch {
-    return res.status(502).json({ ok: false, error: 'lead-service-unavailable' });
+    return res.status(502).json({ ok: false, error: 'lead-service-unavailable', scoring });
   }
 
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, scoring });
 }

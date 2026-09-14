@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FORM_CONTENT, BRAZILIAN_STATES } from '../data/content';
-import { RegisterFormData, StoreType, BrandInterest } from '../types';
+import React, { useState, useRef } from 'react';
+import { FORM_CONTENT } from '../data/content';
+import { RegisterFormData } from '../types';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -9,82 +9,47 @@ import {
   normalizeCNPJ,
 } from '@jussimirvfx/cnpj-cascade/browser';
 
-interface RegisterFormProps {
-  selectedBrandPreference?: BrandInterest;
-}
+import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead } from '../lib/leadQualification.js';
 
-interface CNPJLookupResult {
-  cnpj: string;
-  cnpj_valido: boolean;
-  encontrado: boolean;
-  fonte: string;
-  motivo: string;
-  fontes_consultadas: string[];
-  cnpj_validation_status: 'cadastral_valid' | 'checksum_valid';
-  company: Record<string, unknown>;
-}
+import { validateLead } from '../lib/leadValidation.js';
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPreference }) => {
-  const [formData, setFormData] = useState<RegisterFormData>({
-    storeName: '',
-    contactName: '',
-    whatsapp: '',
-    cnpj: '',
-    city: '',
-    state: 'SP',
-    instagram: '',
-    brandsSold: '',
-    storeType: 'Multimarcas',
-    interestedBrand: selectedBrandPreference || 'As duas marcas',
-    agreedTerms: false
-  });
+const emptyForm: RegisterFormData = {
+  storeName: '', contactName: '', email: '', whatsapp: '', cnpj: '',
+  instagram: '', brandsSold: '', storeType: '', hasPhysicalStore: '', interestedBrand: '',
+};
 
-  useEffect(() => {
-    if (selectedBrandPreference) {
-      setFormData(prev => ({ ...prev, interestedBrand: selectedBrandPreference }));
-    }
-  }, [selectedBrandPreference]);
+const logLeadScore = (scoring: ReturnType<typeof qualifyLead>, source: string) => {
+  const calculation = scoring.lead_score_details.map(item => item.points ?? 0).join(' + ');
+  console.group(`Lead score: ${scoring.lead_score}/100 — ${scoring.qualification_status} (${source})`);
+  console.table(scoring.lead_score_details);
+  console.log(`Somatório: ${calculation} = ${scoring.lead_score}`);
+  console.log('Qualificado:', scoring.qualified);
+  console.log('Desqualificado:', scoring.disqualified);
+  console.log('Motivos de desqualificação:', scoring.disqualification_reasons.length
+    ? scoring.disqualification_reasons.join('; ') : 'Nenhuma regra de desqualificação identificada nos dados disponíveis.');
+  if (!scoring.score_complete) {
+    console.warn('Pontuação parcial. Pendências:', scoring.qualification_pending_reasons.join('; '));
+  }
+  console.log('Detalhamento completo:', scoring);
+  console.groupEnd();
+};
 
+export const RegisterForm: React.FC = () => {
+  const [formData, setFormData] = useState<RegisterFormData>({ ...emptyForm });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const cnpjLookupController = useRef<AbortController | null>(null);
-  const activeCNPJLookup = useRef('');
-  const cnpjLookup = useRef<CNPJLookupResult | null>(null);
+  const submitting = useRef(false);
 
-  useEffect(() => () => cnpjLookupController.current?.abort(), []);
-
-  const lookupCNPJ = async (digits: string) => {
-    if (
-      activeCNPJLookup.current === digits
-      || cnpjLookup.current?.cnpj === digits
-    ) return;
-
-    cnpjLookupController.current?.abort();
-    const controller = new AbortController();
-    cnpjLookupController.current = controller;
-    activeCNPJLookup.current = digits;
-
-    try {
-      const response = await fetch(`/api/cnpj?cnpj=${encodeURIComponent(digits)}`, {
-        headers: { Accept: 'application/json' },
-        signal: controller.signal,
-      });
-      const result = await response.json().catch(() => null) as CNPJLookupResult | null;
-
-      if (
-        !controller.signal.aborted
-        && response.ok
-        && result?.cnpj === digits
-        && result.cnpj_valido === true
-      ) {
-        cnpjLookup.current = result;
-      }
-    } catch {
-      // A consulta cadastral é silenciosa e opcional. O checksum local continua válido.
-    } finally {
-      if (activeCNPJLookup.current === digits) activeCNPJLookup.current = '';
+  const showErrors = (nextErrors: Record<string, string>) => {
+    setErrors(nextErrors);
+    const field = document.getElementById(Object.keys(nextErrors)[0]);
+    if (field?.closest('fieldset')?.disabled) {
+      requestAnimationFrame(() => { field.scrollIntoView({ behavior: 'smooth', block: 'center' }); field.focus({ preventScroll: true }); });
+      return;
     }
+    field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    field?.focus({ preventScroll: true });
   };
 
   const maskWhatsApp = (value: string) => {
@@ -100,19 +65,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else if (name === 'cnpj') {
-      const cnpj = formatCNPJ(value);
+    if (name === 'cnpj') {
+      const cnpj = formatCNPJ(value.replace(/\D/g, '').slice(0, 14));
       const digits = normalizeCNPJ(cnpj);
       const validChecksum = digits.length === 14 && isValidCNPJ(digits);
-
-      cnpjLookupController.current?.abort();
-      activeCNPJLookup.current = '';
-      if (cnpjLookup.current?.cnpj !== digits) cnpjLookup.current = null;
 
       setFormData(prev => ({ ...prev, cnpj }));
       setErrors(prev => ({
@@ -149,40 +107,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
       return;
     }
 
-    if (digits.length === 14) {
-      setErrors(prev => ({ ...prev, cnpj: '' }));
-      void lookupCNPJ(digits);
-    }
-  };
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.storeName.trim()) newErrors.storeName = 'Informe o nome da loja';
-    if (!formData.contactName.trim()) newErrors.contactName = 'Informe o nome do responsável';
-    
-    const whatsappDigits = formData.whatsapp.replace(/\D/g, '');
-    if (!whatsappDigits || whatsappDigits.length < 10) {
-      newErrors.whatsapp = 'Informe um WhatsApp válido com DDD';
-    }
-
-    const cnpjDigits = normalizeCNPJ(formData.cnpj);
-    if (cnpjDigits.length !== 14) {
-      newErrors.cnpj = 'Informe os 14 números do CNPJ.';
-    } else if (!isValidCNPJ(cnpjDigits)) {
-      newErrors.cnpj = 'CNPJ inválido. Confira os números informados.';
-    }
-
-    if (!formData.city.trim()) newErrors.city = 'Informe a cidade';
-    if (!formData.state) newErrors.state = 'Selecione o estado';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (submitting.current) return;
+    const validationErrors = validateLead(formData);
+    if (Object.keys(validationErrors).length) { showErrors(validationErrors); return; }
+    submitting.current = true;
+
+    logLeadScore(qualifyLead(formData), 'prévia antes da consulta do CNPJ');
 
     setLoading(true);
     setErrors(prev => ({ ...prev, submit: '' }));
@@ -202,9 +136,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
         }),
       });
 
-      if (!response.ok) throw new Error('lead-service-unavailable');
-
-      cnpjLookupController.current?.abort();
+      const result = await response.json();
+      if (result.scoring) {
+        logLeadScore(result.scoring, 'avaliação do servidor');
+      }
+      if (!response.ok) {
+        if (result.errors) { showErrors(result.errors); return; }
+        throw new Error('lead-service-unavailable');
+      }
       setSubmitted(true);
       setErrors({});
     } catch {
@@ -213,32 +152,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
         submit: 'Não foi possível enviar sua solicitação. Tente novamente em instantes.',
       }));
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };
 
-  const storeTypes: StoreType[] = [
-    'Boutique',
-    'Multimarcas',
-    'Loja de shopping',
-    'Loja online',
-    'Outro'
-  ];
-
-  const brandOptions: BrandInterest[] = [
-    'Bakulelê',
-    'Biliton',
-    'As duas marcas'
-  ];
-
   return (
     <section
-      id="cadastro"
+      id="cta-form"
       className="relative py-16 sm:py-24 bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{
         backgroundImage: `url('https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/bilitex-ind-1787832304804.webp')`
       }}
     >
+      {/* Preserva links externos antigos para #cadastro. */}
+      <span id="cadastro" className="absolute top-0" aria-hidden="true" />
       {/* Light Black Overlay */}
       <div className="absolute inset-0 bg-black/55 pointer-events-none" />
 
@@ -298,19 +226,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                     whileTap={{ scale: 0.96 }}
                     onClick={() => {
                       setSubmitted(false);
-                      setFormData({
-                        storeName: '',
-                        contactName: '',
-                        whatsapp: '',
-                        cnpj: '',
-                        city: '',
-                        state: 'SP',
-                        instagram: '',
-                        brandsSold: '',
-                        storeType: 'Multimarcas',
-                        interestedBrand: 'As duas marcas',
-                        agreedTerms: false
-                      });
+                      setFormData({ ...emptyForm });
                     }}
                     className="inline-flex items-center justify-center bg-black text-white hover:bg-[#B1AEA7] hover:text-black transition-colors text-xs font-semibold px-6 py-3 cursor-pointer focus:outline-none"
                   >
@@ -329,6 +245,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                 noValidate
               >
                 
+                <fieldset disabled={loading} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   
                   {/* Nome da loja */}
@@ -340,6 +257,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       type="text"
                       id="storeName"
                       name="storeName"
+                      required
+                      aria-invalid={Boolean(errors.storeName)}
+                      aria-describedby={errors.storeName ? "storeName-error" : undefined}
                       value={formData.storeName}
                       onChange={handleChange}
                       placeholder="Ex: Boutique Infantil & Teen"
@@ -348,7 +268,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
                     {errors.storeName && (
-                      <p className="text-xs text-red-600 flex items-center gap-1">
+                      <p id="storeName-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
                         <AlertCircle size={12} /> {errors.storeName}
                       </p>
                     )}
@@ -363,6 +283,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       type="text"
                       id="contactName"
                       name="contactName"
+                      required
+                      aria-invalid={Boolean(errors.contactName)}
+                      aria-describedby={errors.contactName ? "contactName-error" : undefined}
                       value={formData.contactName}
                       onChange={handleChange}
                       placeholder="Seu nome completo"
@@ -371,10 +294,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
                     {errors.contactName && (
-                      <p className="text-xs text-red-600 flex items-center gap-1">
+                      <p id="contactName-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
                         <AlertCircle size={12} /> {errors.contactName}
                       </p>
                     )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-black">E-mail *</label>
+                    <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange}
+                      autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined}
+                      placeholder="voce@exemplo.com"
+                      className={`w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black rounded-none ${errors.email ? 'ring-1 ring-red-600' : ''}`} />
+                    {errors.email && <p id="email-error" role="alert" className="text-xs text-red-600">{errors.email}</p>}
                   </div>
 
                   {/* WhatsApp */}
@@ -386,6 +318,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       type="tel"
                       id="whatsapp"
                       name="whatsapp"
+                      maxLength={15}
+                      inputMode="tel"
+                      required
+                      aria-invalid={Boolean(errors.whatsapp)}
+                      aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
                       value={formData.whatsapp}
                       onChange={handleChange}
                       placeholder="(00) 90000-0000"
@@ -394,7 +331,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
                     {errors.whatsapp && (
-                      <p className="text-xs text-red-600 flex items-center gap-1">
+                      <p id="whatsapp-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
                         <AlertCircle size={12} /> {errors.whatsapp}
                       </p>
                     )}
@@ -409,6 +346,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       type="text"
                       id="cnpj"
                       name="cnpj"
+                      required
                       value={formData.cnpj}
                       onChange={handleChange}
                       onBlur={handleCNPJBlur}
@@ -423,136 +361,70 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
                     {errors.cnpj && (
-                      <p id="cnpj-error" className="text-xs text-red-600 flex items-center gap-1">
+                      <p id="cnpj-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
                         <AlertCircle size={12} /> {errors.cnpj}
                       </p>
                     )}
                   </div>
 
-                  {/* Cidade */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="city" className="block text-xs font-bold uppercase tracking-wider text-black">
-                      Cidade *
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      placeholder="Sua cidade"
-                      className={`w-full bg-[#B1AEA7]/10 ${
-                        errors.city ? 'ring-1 ring-red-600' : ''
-                      } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
-                    />
-                    {errors.city && (
-                      <p className="text-xs text-red-600 flex items-center gap-1">
-                        <AlertCircle size={12} /> {errors.city}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Estado */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="state" className="block text-xs font-bold uppercase tracking-wider text-black">
-                      Estado (UF) *
-                    </label>
-                    <select
-                      id="state"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                      className="w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors cursor-pointer rounded-none"
-                    >
-                      {BRAZILIAN_STATES.map(uf => (
-                        <option key={uf} value={uf}>{uf}</option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* Instagram da loja */}
                   <div className="space-y-1.5">
                     <label htmlFor="instagram" className="block text-xs font-bold uppercase tracking-wider text-black">
-                      Instagram da Loja
+                      Instagram da Loja *
                     </label>
                     <input
                       type="text"
                       id="instagram"
                       name="instagram"
+                      required
+                      aria-invalid={Boolean(errors.instagram)}
+                      aria-describedby={errors.instagram ? "instagram-error" : undefined}
                       value={formData.instagram}
                       onChange={handleChange}
                       placeholder="@sualoja"
-                      className="w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none"
+                      className={` ${errors.instagram ? "ring-1 ring-red-600" : ""} w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
+                    {errors.instagram && <p id="instagram-error" role="alert" className="text-xs text-red-600">{errors.instagram}</p>}
                   </div>
 
                   {/* Principais marcas já vendidas */}
                   <div className="space-y-1.5">
                     <label htmlFor="brandsSold" className="block text-xs font-bold uppercase tracking-wider text-black">
-                      Principais Marcas que Já Vende
+                      Principais Marcas que Já Vende *
                     </label>
                     <input
                       type="text"
                       id="brandsSold"
                       name="brandsSold"
+                      required
+                      aria-invalid={Boolean(errors.brandsSold)}
+                      aria-describedby={errors.brandsSold ? "brandsSold-error" : undefined}
                       value={formData.brandsSold}
                       onChange={handleChange}
                       placeholder="Ex: Marca A, Marca B..."
-                      className="w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none"
+                      className={` ${errors.brandsSold ? "ring-1 ring-red-600" : ""} w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
+                    {errors.brandsSold && <p id="brandsSold-error" role="alert" className="text-xs text-red-600">{errors.brandsSold}</p>}
                   </div>
 
                 </div>
 
-                {/* Tipo de loja */}
-                <div className="space-y-2 pt-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-black">
-                    Tipo de Loja *
-                  </label>
-                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                    {storeTypes.map((type) => (
-                      <motion.button
-                        type="button"
-                        key={type}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setFormData(prev => ({ ...prev, storeType: type }))}
-                        className={`text-xs sm:text-sm font-semibold px-4 py-3 sm:py-2.5 transition-all cursor-pointer min-h-[44px] flex items-center justify-center ${
-                          formData.storeType === type
-                            ? 'bg-black text-white shadow-xs'
-                            : 'bg-[#B1AEA7]/20 text-black hover:bg-[#B1AEA7]/40'
-                        }`}
-                      >
-                        {type}
-                      </motion.button>
-                    ))}
+                {[
+                  { name: 'storeType', label: 'Tipo de Loja', options: storeOptions },
+                  { name: 'hasPhysicalStore', label: 'Possui loja física?', options: physicalStoreOptions },
+                  { name: 'interestedBrand', label: 'Marca de Interesse Principal', options: brandOptions.map(label => ({ value: label, label })) },
+                ].map(({ name, label, options }) => (
+                  <div key={name} className="space-y-1.5">
+                    <label htmlFor={name} className="block text-xs font-bold uppercase tracking-wider text-black">{label} *</label>
+                    <select id={name} name={name} required value={formData[name as keyof RegisterFormData]} onChange={handleChange}
+                      aria-invalid={Boolean(errors[name])} aria-describedby={errors[name] ? `${name}-error` : undefined}
+                      className={`w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black rounded-none ${errors[name] ? 'ring-1 ring-red-600' : ''}`}>
+                      <option value="" disabled>Selecionar</option>
+                      {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                    {errors[name] && <p id={`${name}-error`} role="alert" className="text-xs text-red-600">{errors[name]}</p>}
                   </div>
-                </div>
-
-                {/* Marca de interesse */}
-                <div className="space-y-2 pt-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-black">
-                    Marca de Interesse Principal *
-                  </label>
-                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                    {brandOptions.map((brand) => (
-                      <motion.button
-                        type="button"
-                        key={brand}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setFormData(prev => ({ ...prev, interestedBrand: brand }))}
-                        className={`text-xs sm:text-sm font-semibold px-4 py-3 sm:py-2.5 transition-all cursor-pointer min-h-[44px] flex items-center justify-center ${
-                          formData.interestedBrand === brand
-                            ? 'bg-black text-white shadow-xs'
-                            : 'bg-[#B1AEA7]/20 text-black hover:bg-[#B1AEA7]/40'
-                        }`}
-                      >
-                        {brand}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                ))}
 
                 {/* Submit Button */}
                 <div className="pt-4">
@@ -572,6 +444,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                   )}
                 </div>
 
+                </fieldset>
               </motion.form>
             )}
           </AnimatePresence>
