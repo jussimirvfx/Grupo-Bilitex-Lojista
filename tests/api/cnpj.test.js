@@ -84,6 +84,60 @@ test('o endpoint da LP rejeita CNPJ inválido sem consultar provedores', async (
   assert.equal(calls, 0);
 });
 
+test('o endpoint da LP encaminha CNPJ válido para a API central com OIDC', async () => {
+  let forwarded;
+  globalThis.fetch = async (url, options) => {
+    forwarded = { url: String(url), options };
+    return new Response(JSON.stringify({
+      cnpj: '60887522000189',
+      cnpj_valido: true,
+      encontrado: true,
+      fonte: 'SINTEGRA',
+      motivo: '',
+      fontes_consultadas: ['SINTEGRA'],
+      cnpj_validation_status: 'cadastral_valid',
+      company: { razao_social: 'Empresa Fictícia Ltda' },
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  const request = {
+    method: 'GET',
+    query: { cnpj: '60.887.522/0001-89' },
+    headers: {
+      host: 'grupo-bilitex-lojista.vercel.app',
+      origin: 'https://grupo-bilitex-lojista.vercel.app',
+      'sec-fetch-site': 'same-origin',
+      'x-forwarded-for': '192.0.2.21',
+      'x-vercel-oidc-token': 'test-oidc-token',
+    },
+  };
+  const response = {
+    statusCode: 200,
+    body: null,
+    headers: {},
+    setHeader(name, value) {
+      this.headers[name] = value;
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(body) {
+      this.body = body;
+      return this;
+    },
+  };
+
+  await handler(request, response);
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.fonte, 'SINTEGRA');
+  assert.equal(forwarded.url, 'https://validador-cnpj.vfxaceleradordevendas.com.br/api/v1/cnpj');
+  assert.equal(forwarded.options.method, 'POST');
+  assert.equal(forwarded.options.headers.Authorization, 'Bearer test-oidc-token');
+  assert.equal(forwarded.options.headers['X-VFX-Landing-ID'], 'grupo-bilitex-lojista');
+  assert.deepEqual(JSON.parse(forwarded.options.body), { cnpj: '60887522000189' });
+});
+
 test('consulta SINTEGRA e para no primeiro registro utilizável', async () => {
   process.env.SINTEGRA_CNPJ_API_KEY = 'test-only';
   process.env.CRM_CNPJ_BEARER_TOKEN = 'test-only';

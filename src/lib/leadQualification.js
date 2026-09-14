@@ -33,7 +33,7 @@ export function companyAge(openingDate, now = new Date()) {
 
 export function qualifyLead(data, company = {}, now = new Date()) {
   const city = String(company.endereco?.cidade || '').trim();
-  const state = String(company.endereco?.uf || '').trim().toUpperCase();
+  const state = String(company.endereco?.estado || company.endereco?.uf || '').trim().toUpperCase();
   const years = companyAge(company.data_abertura, now);
   // Faixas em anos completos: <1, 1–2, 3–4 e 5+, sem lacuna no quinto ano.
   const age = years === null ? null : ageOptions[years < 1 ? 0 : years < 3 ? 1 : years < 5 ? 2 : 3];

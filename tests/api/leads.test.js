@@ -32,6 +32,7 @@ const createRequest = (body, ip) => ({
     origin: 'https://grupo-bilitex-lojista.vercel.app',
     'sec-fetch-site': 'same-origin',
     'x-forwarded-for': ip,
+    'x-vercel-oidc-token': 'test-oidc-token',
   },
 });
 
@@ -90,14 +91,22 @@ test('envia uma vez ao webhook com enriquecimento normalizado', async () => {
   const calls = [];
   globalThis.fetch = async (url, options) => {
     calls.push({ url: String(url), options });
-    if (String(url).includes('brasilapi.com.br')) {
+    if (String(url).includes('validador-cnpj.vfxaceleradordevendas.com.br')) {
       return new Response(JSON.stringify({
-        razao_social: 'Empresa Fictícia Ltda',
-        nome_fantasia: 'Loja Fictícia',
-        descricao_situacao_cadastral: 'ATIVA',
-        data_inicio_atividade: '2020-01-02',
-        municipio: 'Itajaí',
-        uf: 'SC',
+        cnpj: '60887522000189',
+        cnpj_valido: true,
+        encontrado: true,
+        fonte: 'SINTEGRA',
+        motivo: '',
+        fontes_consultadas: ['SINTEGRA'],
+        cnpj_validation_status: 'cadastral_valid',
+        company: {
+          razao_social: 'Empresa Fictícia Ltda',
+          nome_fantasia: 'Loja Fictícia',
+          situacao_cadastral: 'ATIVA',
+          data_abertura: '02/01/2020',
+          endereco: { cidade: 'Itajaí', estado: 'SC' },
+        },
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
     assert.equal(logs[0].msg, 'landing_form_backup');
@@ -119,7 +128,7 @@ test('envia uma vez ao webhook com enriquecimento normalizado', async () => {
   assert.equal(payload.cnpj, '60.887.522/0001-89');
   assert.equal(payload.cnpj_digits, '60887522000189');
   assert.equal(payload.cnpj_validation_status, 'cadastral_valid');
-  assert.equal(payload.fonte, 'BrasilAPI');
+  assert.equal(payload.fonte, 'SINTEGRA');
   assert.equal(payload.company.razao_social, 'Empresa Fictícia Ltda');
   assert.equal(payload.source, 'grupo-bilitex-lojista');
   assert.equal(payload.lead_score, payload.value);
@@ -131,7 +140,7 @@ test('envia uma vez ao webhook com enriquecimento normalizado', async () => {
 test('mantém a entrega checksum-only quando a cascata está indisponível', async () => {
   let webhookPayload;
   globalThis.fetch = async (url, options) => {
-    if (String(url).includes('brasilapi.com.br')) {
+    if (String(url).includes('validador-cnpj.vfxaceleradordevendas.com.br')) {
       return new Response('{}', { status: 503, headers: { 'Content-Type': 'application/json' } });
     }
     webhookPayload = JSON.parse(options.body);
@@ -148,7 +157,7 @@ test('mantém a entrega checksum-only quando a cascata está indisponível', asy
   assert.equal(webhookPayload.qualified, false);
   assert.equal(webhookPayload.city, '');
   assert.equal(webhookPayload.state, '');
-  assert.deepEqual(webhookPayload.fontes_consultadas, ['BrasilAPI']);
+  assert.deepEqual(webhookPayload.fontes_consultadas, []);
 });
 
 
@@ -178,7 +187,22 @@ test('valida todos os campos, opções, telefone e e-mail antes de qualquer cons
 test('desqualificação aparece no retorno e no backup com os mesmos pontos do webhook', async () => {
   let delivered;
   globalThis.fetch = async (url, options) => {
-    if (String(url).includes('brasilapi.com.br')) return new Response(JSON.stringify({ razao_social: 'Empresa Teste', data_inicio_atividade: '2020-01-01', municipio: 'Itajaí', uf: 'SC' }), { status: 200 });
+    if (String(url).includes('validador-cnpj.vfxaceleradordevendas.com.br')) {
+      return new Response(JSON.stringify({
+        cnpj: '60887522000189',
+        cnpj_valido: true,
+        encontrado: true,
+        fonte: 'SINTEGRA',
+        motivo: '',
+        fontes_consultadas: ['SINTEGRA'],
+        cnpj_validation_status: 'cadastral_valid',
+        company: {
+          razao_social: 'Empresa Teste',
+          data_abertura: '01/01/2020',
+          endereco: { cidade: 'Itajaí', estado: 'SC' },
+        },
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
     delivered = JSON.parse(options.body);
     assert.deepEqual(logs[0].payload, delivered);
     return new Response('{}', { status: 200 });

@@ -1,9 +1,9 @@
 import {
   formatCNPJ,
-  lookupCNPJ,
   normalizeCNPJ,
 } from '@jussimirvfx/cnpj-cascade';
 import { isSameOrigin } from '@jussimirvfx/cnpj-cascade/vercel';
+import { lookupCNPJViaVFX } from './_lib/cnpj-api.js';
 
 import { qualifyLead } from '../src/lib/leadQualification.js';
 import { validateLead } from '../src/lib/leadValidation.js';
@@ -116,12 +116,19 @@ export default async function handler(req, res) {
   }
 
   const webhookURL = process.env.N8N_GRUPO_BILITEX_WEBHOOK_URL;
-  // A localização e a idade vêm da consulta do servidor, nunca do navegador.
-  let cnpjLookup;
+  // A localização e a idade vêm da API central, nunca do navegador.
+  let cnpjLookup = {
+    cnpj_valido: true,
+    encontrado: false,
+    fonte: '',
+    motivo: 'lookup-unavailable',
+    fontes_consultadas: [],
+    company: {},
+  };
   try {
-    cnpjLookup = await lookupCNPJ(body.cnpj);
+    cnpjLookup = await lookupCNPJViaVFX(req, body.cnpj);
   } catch {
-    cnpjLookup = { company: {}, motivo: 'Consulta cadastral indisponível', encontrado: false };
+    // Enrichment is optional: a provider outage must not prevent lead delivery.
   }
   const payload = buildLeadPayload(body, cnpjLookup);
   const { city, state, tempoCnpj, cnpj_age_years, data_abertura, lead_score, value, currency,
