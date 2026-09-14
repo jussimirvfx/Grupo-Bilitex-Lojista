@@ -1,0 +1,6 @@
+{
+  "name": "Grupo Bilitex — Portal do Lojista",
+  "description": "Landing page B2B do Grupo Bilitex para captação de lojistas, boutiques e multimarcas interessadas nas marcas Bakulelê e Biliton.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

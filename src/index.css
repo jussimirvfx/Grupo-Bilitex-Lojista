@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --color-warm-gray: #B1AEA7;
+  --color-warm-gray-light: #F7F6F4;
+  --color-warm-gray-muted: #E2E0DB;
+}
+
+html {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  scroll-behavior: smooth;
+}
+
+/* Custom minimal focus outline */
+:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
