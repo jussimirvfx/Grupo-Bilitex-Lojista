@@ -189,7 +189,7 @@ export const FAQ_CONTENT: FAQItem[] = [
   {
     id: "faq-1",
     question: "Quem pode revender as marcas do Grupo Bilitex?",
-    answer: "Lojas multimarcas, boutiques, lojas de shopping e lojas online com CNPJ ativo podem solicitar uma avaliação comercial."
+    answer: "Lojas multimarcas, boutiques, lojas de shopping e lojas online com CNPJ podem solicitar uma avaliação comercial."
   },
   {
     id: "faq-4",

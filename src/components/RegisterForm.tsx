@@ -1,11 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FORM_CONTENT, BRAZILIAN_STATES } from '../data/content';
 import { RegisterFormData, StoreType, BrandInterest } from '../types';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import {
+  formatCNPJ,
+  isValidCNPJ,
+  normalizeCNPJ,
+} from '@jussimirvfx/cnpj-cascade/browser';
 
 interface RegisterFormProps {
   selectedBrandPreference?: BrandInterest;
+}
+
+interface CNPJLookupResult {
+  cnpj: string;
+  cnpj_valido: boolean;
+  encontrado: boolean;
+  fonte: string;
+  motivo: string;
+  fontes_consultadas: string[];
+  cnpj_validation_status: 'cadastral_valid' | 'checksum_valid';
+  company: Record<string, unknown>;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPreference }) => {
@@ -32,15 +48,43 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const cnpjLookupController = useRef<AbortController | null>(null);
+  const activeCNPJLookup = useRef('');
+  const cnpjLookup = useRef<CNPJLookupResult | null>(null);
 
-  // Mask functions
-  const maskCNPJ = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 14);
-    return digits
-      .replace(/^(\d{2})(\d)/, '$1.$2')
-      .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/\.(\d{3})(\d)/, '.$1/$2')
-      .replace(/(\d{4})(\d)/, '$1-$2');
+  useEffect(() => () => cnpjLookupController.current?.abort(), []);
+
+  const lookupCNPJ = async (digits: string) => {
+    if (
+      activeCNPJLookup.current === digits
+      || cnpjLookup.current?.cnpj === digits
+    ) return;
+
+    cnpjLookupController.current?.abort();
+    const controller = new AbortController();
+    cnpjLookupController.current = controller;
+    activeCNPJLookup.current = digits;
+
+    try {
+      const response = await fetch(`/api/cnpj?cnpj=${encodeURIComponent(digits)}`, {
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      const result = await response.json().catch(() => null) as CNPJLookupResult | null;
+
+      if (
+        !controller.signal.aborted
+        && response.ok
+        && result?.cnpj === digits
+        && result.cnpj_valido === true
+      ) {
+        cnpjLookup.current = result;
+      }
+    } catch {
+      // A consulta cadastral é silenciosa e opcional. O checksum local continua válido.
+    } finally {
+      if (activeCNPJLookup.current === digits) activeCNPJLookup.current = '';
+    }
   };
 
   const maskWhatsApp = (value: string) => {
@@ -62,7 +106,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else if (name === 'cnpj') {
-      setFormData(prev => ({ ...prev, cnpj: maskCNPJ(value) }));
+      const cnpj = formatCNPJ(value);
+      const digits = normalizeCNPJ(cnpj);
+      const validChecksum = digits.length === 14 && isValidCNPJ(digits);
+
+      cnpjLookupController.current?.abort();
+      activeCNPJLookup.current = '';
+      if (cnpjLookup.current?.cnpj !== digits) cnpjLookup.current = null;
+
+      setFormData(prev => ({ ...prev, cnpj }));
+      setErrors(prev => ({
+        ...prev,
+        cnpj: digits.length === 14 && !validChecksum
+          ? 'CNPJ inválido. Confira os números informados.'
+          : '',
+      }));
+      return;
     } else if (name === 'whatsapp') {
       setFormData(prev => ({ ...prev, whatsapp: maskWhatsApp(value) }));
     } else {
@@ -71,6 +130,28 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
 
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleCNPJBlur = () => {
+    const digits = normalizeCNPJ(formData.cnpj);
+
+    if (digits.length > 0 && digits.length < 14) {
+      setErrors(prev => ({ ...prev, cnpj: 'Informe os 14 números do CNPJ.' }));
+      return;
+    }
+
+    if (digits.length === 14 && !isValidCNPJ(digits)) {
+      setErrors(prev => ({
+        ...prev,
+        cnpj: 'CNPJ inválido. Confira os números informados.',
+      }));
+      return;
+    }
+
+    if (digits.length === 14) {
+      setErrors(prev => ({ ...prev, cnpj: '' }));
+      void lookupCNPJ(digits);
     }
   };
 
@@ -85,9 +166,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
       newErrors.whatsapp = 'Informe um WhatsApp válido com DDD';
     }
 
-    const cnpjDigits = formData.cnpj.replace(/\D/g, '');
-    if (!cnpjDigits || cnpjDigits.length !== 14) {
-      newErrors.cnpj = 'CNPJ inválido (deve conter 14 dígitos)';
+    const cnpjDigits = normalizeCNPJ(formData.cnpj);
+    if (cnpjDigits.length !== 14) {
+      newErrors.cnpj = 'Informe os 14 números do CNPJ.';
+    } else if (!isValidCNPJ(cnpjDigits)) {
+      newErrors.cnpj = 'CNPJ inválido. Confira os números informados.';
     }
 
     if (!formData.city.trim()) newErrors.city = 'Informe a cidade';
@@ -97,17 +180,41 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
+    setErrors(prev => ({ ...prev, submit: '' }));
 
-    // Simulate backend/CRM submission
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          cnpj: formatCNPJ(formData.cnpj),
+          cnpj_digits: normalizeCNPJ(formData.cnpj),
+          cnpj_validation_status: 'checksum_valid',
+          submittedAt: new Date().toISOString(),
+          source: 'grupo-bilitex-lojista',
+          url: window.location.href,
+        }),
+      });
+
+      if (!response.ok) throw new Error('lead-service-unavailable');
+
+      cnpjLookupController.current?.abort();
       setSubmitted(true);
-    }, 800);
+      setErrors({});
+    } catch {
+      setErrors(prev => ({
+        ...prev,
+        submit: 'Não foi possível enviar sua solicitação. Tente novamente em instantes.',
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const storeTypes: StoreType[] = [
@@ -296,7 +403,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                   {/* CNPJ */}
                   <div className="space-y-1.5">
                     <label htmlFor="cnpj" className="block text-xs font-bold uppercase tracking-wider text-black">
-                      CNPJ Ativo da Loja *
+                      CNPJ da Loja *
                     </label>
                     <input
                       type="text"
@@ -304,13 +411,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                       name="cnpj"
                       value={formData.cnpj}
                       onChange={handleChange}
+                      onBlur={handleCNPJBlur}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      maxLength={18}
+                      aria-invalid={Boolean(errors.cnpj)}
+                      aria-describedby={errors.cnpj ? 'cnpj-error' : undefined}
                       placeholder="00.000.000/0000-00"
                       className={`w-full bg-[#B1AEA7]/10 ${
                         errors.cnpj ? 'ring-1 ring-red-600' : ''
                       } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
                     />
                     {errors.cnpj && (
-                      <p className="text-xs text-red-600 flex items-center gap-1">
+                      <p id="cnpj-error" className="text-xs text-red-600 flex items-center gap-1">
                         <AlertCircle size={12} /> {errors.cnpj}
                       </p>
                     )}
@@ -452,6 +565,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ selectedBrandPrefere
                   >
                     {loading ? 'Processando envio...' : 'Quero ser lojista parceiro'}
                   </motion.button>
+                  {errors.submit && (
+                    <p role="alert" className="mt-3 text-sm text-red-600">
+                      {errors.submit}
+                    </p>
+                  )}
                 </div>
 
               </motion.form>
