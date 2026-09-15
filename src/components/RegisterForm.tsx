@@ -12,6 +12,8 @@ import {
 import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead } from '../lib/leadQualification.js';
 
 import { validateLead } from '../lib/leadValidation.js';
+import { useMetaPixel } from 'scoretrack';
+import { trackAcceptedLead } from '../lib/metaTracking';
 
 const emptyForm: RegisterFormData = {
   storeName: '', contactName: '', email: '', whatsapp: '', cnpj: '',
@@ -35,6 +37,7 @@ const logLeadScore = (scoring: ReturnType<typeof qualifyLead>, source: string) =
 };
 
 export const RegisterForm: React.FC = () => {
+  const tracker = useMetaPixel();
   const [formData, setFormData] = useState<RegisterFormData>({ ...emptyForm });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -146,6 +149,7 @@ export const RegisterForm: React.FC = () => {
       }
       setSubmitted(true);
       setErrors({});
+      if (result.scoring) void trackAcceptedLead(formData, result.scoring, tracker);
     } catch {
       setErrors(prev => ({
         ...prev,
