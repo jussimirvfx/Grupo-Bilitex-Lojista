@@ -54,3 +54,9 @@ export function qualifyLead(data, company = {}, now = new Date()) {
   const status = reasons.length ? 'desqualificado' : pending.length ? 'pendente' : 'qualificado';
   return { city, state, tempoCnpj: age?.value ?? null, cnpj_age_years: years, data_abertura: company.data_abertura || null, lead_score: score, value: score, currency: 'BRL', lead_score_details: details, qualification_status: status, qualified: status === 'qualificado', disqualified: status === 'desqualificado', disqualification_reasons: reasons, qualification_pending_reasons: pending, score_complete: pending.length === 0 };
 }
+
+export function isCurationBlocked(data, company = {}, now = new Date()) {
+  const store = storeOptions.find(option => option.value === data.storeType || option.label === data.storeType);
+  return ['autonomo', 'magazine'].includes(store?.value)
+    || companyAge(company.data_abertura, now) === 0;
+}

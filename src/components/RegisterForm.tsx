@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { FORM_CONTENT } from '../data/content';
 import { RegisterFormData } from '../types';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   formatCNPJ,
@@ -9,7 +9,7 @@ import {
   normalizeCNPJ,
 } from '@jussimirvfx/cnpj-cascade/browser';
 
-import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead } from '../lib/leadQualification.js';
+import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead, isCurationBlocked } from '../lib/leadQualification.js';
 
 import { validateLead } from '../lib/leadValidation.js';
 import { useMetaPixel } from 'scoretrack';
@@ -41,6 +41,7 @@ export const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState<RegisterFormData>({ ...emptyForm });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [curationBlocked, setCurationBlocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const submitting = useRef(false);
 
@@ -117,6 +118,11 @@ export const RegisterForm: React.FC = () => {
     if (submitting.current) return;
     const validationErrors = validateLead(formData);
     if (Object.keys(validationErrors).length) { showErrors(validationErrors); return; }
+    if (isCurationBlocked(formData)) {
+      setCurationBlocked(true);
+      setErrors({});
+      return;
+    }
     submitting.current = true;
 
     logLeadScore(qualifyLead(formData), 'prévia antes da consulta do CNPJ');
@@ -146,6 +152,11 @@ export const RegisterForm: React.FC = () => {
       if (!response.ok) {
         if (result.errors) { showErrors(result.errors); return; }
         throw new Error('lead-service-unavailable');
+      }
+      if (result.curationBlocked) {
+        setCurationBlocked(true);
+        setErrors({});
+        return;
       }
       setSubmitted(true);
       setErrors({});
@@ -199,7 +210,7 @@ export const RegisterForm: React.FC = () => {
         >
           
           <AnimatePresence mode="wait">
-            {submitted ? (
+            {submitted || curationBlocked ? (
               <motion.div 
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -207,35 +218,34 @@ export const RegisterForm: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4 }}
                 className="py-12 text-center space-y-6"
+                role="status"
+                id="form-result"
+                tabIndex={-1}
+                onAnimationComplete={() => {
+                  const result = document.getElementById('form-result');
+                  result?.focus({ preventScroll: true });
+                  result?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
               >
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black text-white"
+                  className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${curationBlocked ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}
                 >
-                  <CheckCircle2 size={36} />
+                  {curationBlocked ? <X size={36} aria-hidden="true" /> : <CheckCircle2 size={36} aria-hidden="true" />}
                 </motion.div>
                 <div className="space-y-2 max-w-lg mx-auto">
+                  {curationBlocked ? (
+                    <p className="text-base text-black/80 whitespace-pre-line">{'Infelizmente, informamos que o seu cadastro não foi selecionado para avançarmos neste momento.\n\nComo nosso processo de entrada passa por uma curadoria interna, não conseguiremos seguir com a parceria agora.\n\nAgradecemos o seu interesse na nossa marca e desejamos muito sucesso!'}</p>
+                  ) : <>
                   <h3 className="text-2xl font-bold text-black">
                     Solicitação Enviada com Sucesso!
                   </h3>
                   <p className="text-base text-black/80">
                     {FORM_CONTENT.successMessage}
                   </p>
-                </div>
-                <div className="pt-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      setSubmitted(false);
-                      setFormData({ ...emptyForm });
-                    }}
-                    className="inline-flex items-center justify-center bg-black text-white hover:bg-[#B1AEA7] hover:text-black transition-colors text-xs font-semibold px-6 py-3 cursor-pointer focus:outline-none"
-                  >
-                    Enviar novo cadastro
-                  </motion.button>
+                  </>}
                 </div>
               </motion.div>
             ) : (

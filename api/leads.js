@@ -5,7 +5,7 @@ import {
 import { isSameOrigin } from '@jussimirvfx/cnpj-cascade/vercel';
 import { lookupCNPJViaVFX } from './_lib/cnpj-api.js';
 
-import { qualifyLead } from '../src/lib/leadQualification.js';
+import { qualifyLead, isCurationBlocked } from '../src/lib/leadQualification.js';
 import { validateLead } from '../src/lib/leadValidation.js';
 import { recordFormBackup } from './_lib/formBackup.js';
 
@@ -116,6 +116,9 @@ export default async function handler(req, res) {
   }
 
   const webhookURL = process.env.N8N_GRUPO_BILITEX_WEBHOOK_URL;
+  if (isCurationBlocked(body)) {
+    return res.status(200).json({ ok: true, curationBlocked: true });
+  }
   // A localização e a idade vêm da API central, nunca do navegador.
   let cnpjLookup = {
     cnpj_valido: true,
@@ -137,6 +140,9 @@ export default async function handler(req, res) {
   const scoring = { city, state, tempoCnpj, cnpj_age_years, data_abertura, lead_score, value, currency,
     lead_score_details, qualification_status, qualified, disqualified, disqualification_reasons,
     qualification_pending_reasons, score_complete };
+  if (isCurationBlocked(body, cnpjLookup.company)) {
+    return res.status(200).json({ ok: true, curationBlocked: true, scoring });
+  }
   await recordFormBackup(payload, req, { source: 'server-validated', webhookConfigured: Boolean(webhookURL) });
   console.info(JSON.stringify({ msg: 'lead_scoring', ...scoring }));
   if (!webhookURL) {

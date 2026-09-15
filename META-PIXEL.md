@@ -13,6 +13,8 @@ O arquivo `.env.local` é ignorado pelo Git. Configure os valores separadamente 
 
 ## Comportamento
 
+A curadoria bloqueia `autonomo` e `magazine` no navegador e no servidor. CNPJ com menos de um ano é bloqueado após a consulta cadastral no servidor. Esses casos retornam antes do backup/webhook e dos eventos Lead/LeadQualificado, exibindo a mensagem de recusa com X vermelho. Os demais mantêm o fluxo existente, com check verde na confirmação. As regras de pontuação permanecem iguais; a indisponibilidade da consulta mantém o comportamento anterior de pontuação pendente.
+
 O provider do pacote inicializa o Pixel e envia PageView. O componente `MetaPixel` foi omitido porque esta versão também envia PageView, duplicando o evento do provider. O pacote exige `ACCESS_TOKEN` no cliente; usamos o marcador não secreto `server-managed`. O token real fica na rota `/api/meta/conversions`. Se a rota ficar indisponível, o fallback direto do pacote falhará com esse marcador; ele nunca recebe a credencial real.
 
 `MetaScrollTracking` usa `trackCustomEvent` do pacote para enviar `Scroll` nos marcos 0, 25, 50, 75 e 100, com `scroll_depth` no Pixel e na CAPI. O marco 0 ocorre na inicialização; os demais seguem a distância rolável. Cada marco dispara uma vez por carregamento, inclusive em StrictMode e em saltos diretos ao rodapé.
