@@ -14,16 +14,14 @@ export const AUTHORITY_METRICS = [
 
 export const BAKULELE_CONTENT = {
   title: "Bakulelê",
-  subtitle: "Moda baby ao infantil",
   tagline: "Nossa moda é o mundo",
-  benefitsTitle: "Por que ter Bakulelê na sua loja?",
   collection: "Bakulelê",
   ctaText: "Quero revender Bakulelê",
   topics: [
-    "Giro rápido",
-    "Forte apelo visual",
-    "Coleção completa",
-    "Marca consolidada"
+    "Moda baby e infantil",
+    "Do P ao tamanho 14",
+    "Universo lúdico e contemporâneo",
+    "Peças que unem estilo, conforto e qualidade"
   ],
   gallery: [
     {
@@ -169,23 +167,23 @@ export const ABOUT_CONTENT = {
 export const BENEFITS_CONTENT: BenefitItem[] = [
   {
     id: "ben-1",
-    title: "Coleções completas",
-    description: "Duas marcas com propostas para diferentes fases, do baby ao teen."
+    title: "Giro rápido",
+    description: "Peças comerciais e fáceis de vender, pensadas para garantir boa rotatividade no ponto de venda."
   },
   {
     id: "ben-2",
-    title: "Grade ampla",
-    description: "Bakulelê do P ao 14 e Biliton do 12 ao 20."
+    title: "Forte apelo visual",
+    description: "Cores, estampas e detalhes que chamam atenção e valorizam a exposição da coleção na loja."
   },
   {
     id: "ben-3",
-    title: "Atendimento nacional",
-    description: "Equipe interna e representantes comerciais em todo o Brasil."
+    title: "Coleção completa",
+    description: "Um mix diversificado de peças para compor diferentes propostas e ampliar as possibilidades de venda."
   },
   {
     id: "ben-4",
-    title: "Suporte comercial próximo",
-    description: "Acompanhamento personalizado antes, durante e depois do pedido."
+    title: "Marca consolidada",
+    description: "Uma marca com experiência no mercado, reconhecimento e uma trajetória construída ao lado dos lojistas."
   }
 ];
 

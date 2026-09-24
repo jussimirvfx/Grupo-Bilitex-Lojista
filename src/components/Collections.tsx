@@ -170,17 +170,10 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
             <h3 className="text-2xl sm:text-3xl lg:text-4xl text-black tracking-tight font-bold">
               {BAKULELE_CONTENT.title}
             </h3>
-            <p className="text-base sm:text-lg font-semibold text-black">
-              {BAKULELE_CONTENT.subtitle}
-            </p>
-            <p className="text-sm sm:text-base font-medium text-black/70">
+            <p className="text-base sm:text-lg font-bold text-black">
               {BAKULELE_CONTENT.tagline}
             </p>
           </div>
-
-          <h4 className="text-xl sm:text-2xl font-bold text-black tracking-tight">
-            {BAKULELE_CONTENT.benefitsTitle}
-          </h4>
 
           {/* Smooth Continuous Carousel */}
           <BrandCarousel items={BAKULELE_CONTENT.gallery} />
