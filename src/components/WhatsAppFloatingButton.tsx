@@ -16,7 +16,7 @@ export function WhatsAppFloatingButton({ onCtaClick }: { onCtaClick: () => void 
   return (
     <div className="fixed bottom-24 md:bottom-6 right-4 z-40 flex flex-col items-end gap-3">
       {showCallout && (
-        <div className="relative bg-white p-4 pr-9 rounded-lg shadow-lg border border-black/10 max-w-[min(18rem,calc(100vw-2rem))]">
+        <div className="relative bg-white p-4 pr-9 rounded-xl shadow-lg border border-black/10 max-w-[min(18rem,calc(100vw-2rem))]">
           <button type="button" onClick={() => setShowCallout(false)} aria-label="Fechar aviso" className="absolute top-1 right-1 p-2 rounded focus-visible:outline-2">
             <X size={16} />
           </button>

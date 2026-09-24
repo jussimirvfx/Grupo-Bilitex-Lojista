@@ -107,7 +107,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               whileHover={{ scale: 1.04, boxShadow: '0 20px 25px -5px rgba(251, 230, 78, 0.3)' }}
               whileTap={{ scale: 0.97 }}
               onClick={onCtaClick}
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-[#FBE64E] text-black hover:bg-[#ebd73f] transition-colors text-sm sm:text-base font-bold px-8 py-4 tracking-wide cursor-pointer focus:outline-none shadow-xl min-h-[48px]"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-[#FBE64E] text-black hover:bg-[#ebd73f] transition-colors text-sm sm:text-base font-bold px-8 py-4 tracking-wide cursor-pointer focus:outline-none shadow-xl min-h-[48px] rounded-xl"
             >
               {HERO_CONTENT.ctaText}
             </motion.button>
@@ -124,7 +124,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.7 }}
-        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-10 md:right-12 z-20 flex items-center gap-6 sm:gap-10"
+        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-10 md:right-12 z-20 flex items-center gap-4 sm:gap-8"
       >
         {HERO_SLIDES.map((slide, index) => {
           const isActive = index === activeSlide;
@@ -144,7 +144,11 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               <img
                 src={slide.logo}
                 alt={slide.brand}
-                className={`h-8 sm:h-10 md:h-12 w-auto object-contain transition-all drop-shadow-md ${
+                className={`w-auto object-contain transition-all drop-shadow-md ${
+                  slide.id === 'biliton'
+                    ? 'h-14 sm:h-[4.5rem] md:h-[5.5rem]'
+                    : 'h-8 sm:h-10 md:h-12 translate-y-2 sm:translate-y-3 md:translate-y-4'
+                } ${
                   slide.isWhiteFilter ? 'brightness-0 invert' : ''
                 }`}
                 referrerPolicy="no-referrer"

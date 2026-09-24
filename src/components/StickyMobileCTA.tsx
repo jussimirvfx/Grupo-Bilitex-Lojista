@@ -35,7 +35,7 @@ export const StickyMobileCTA: React.FC<StickyMobileCTAProps> = ({ onCtaClick }) 
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={onCtaClick}
-            className="w-full bg-black text-white active:bg-[#B1AEA7] active:text-black transition-colors text-xs font-bold py-3.5 px-4 uppercase tracking-wider cursor-pointer focus:outline-none"
+            className="w-full bg-black text-white active:bg-[#B1AEA7] active:text-black transition-colors text-xs font-bold py-3.5 px-4 uppercase tracking-wider cursor-pointer focus:outline-none rounded-xl"
           >
             Quero ser lojista parceiro
           </motion.button>

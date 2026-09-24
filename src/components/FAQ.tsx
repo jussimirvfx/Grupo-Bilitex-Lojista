@@ -38,7 +38,7 @@ export const FAQ: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-30px' }}
                 transition={{ duration: 0.4, delay: index * 0.08 }}
-                className="bg-black p-5 sm:p-6 transition-colors border border-[#FBE64E] text-left"
+                className="bg-black p-5 sm:p-6 transition-colors border border-[#FBE64E] text-left rounded-xl"
               >
                 <button
                   onClick={() => toggleAccordion(faq.id)}
@@ -66,7 +66,7 @@ export const FAQ: React.FC = () => {
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="pt-4 text-sm sm:text-base text-white/85 leading-relaxed">
+                      <div className="pt-4 text-sm sm:text-base text-white/85 leading-relaxed whitespace-pre-line">
                         {faq.answer}
                       </div>
                     </motion.div>

@@ -109,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm }) => {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={onNavigateToForm}
-              className="bg-[#FBE64E] text-black hover:bg-[#ebd73f] transition-colors text-xs lg:text-sm font-bold px-4 py-2.5 lg:px-6 lg:py-3 tracking-wide cursor-pointer focus:outline-none shadow-sm whitespace-nowrap"
+              className="bg-[#FBE64E] text-black hover:bg-[#ebd73f] transition-colors text-xs lg:text-sm font-bold px-4 py-2.5 lg:px-6 lg:py-3 tracking-wide cursor-pointer focus:outline-none shadow-sm whitespace-nowrap rounded-xl"
             >
               Quero ser lojista parceiro
             </motion.button>
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm }) => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden bg-white border-b border-[#B1AEA7]/30 px-6 py-6 space-y-6 shadow-md"
+            className="md:hidden overflow-hidden bg-white border-b border-[#B1AEA7]/30 px-6 py-6 space-y-6 shadow-md rounded-b-xl"
           >
             <nav className="flex flex-col space-y-4">
               <button
@@ -173,7 +173,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm }) => {
                   setMobileMenuOpen(false);
                   onNavigateToForm();
                 }}
-                className="w-full bg-[#FBE64E] text-black text-center text-sm font-bold py-3 px-6 cursor-pointer focus:outline-none shadow-sm hover:bg-[#ebd73f] transition-colors"
+                className="w-full bg-[#FBE64E] text-black text-center text-sm font-bold py-3 px-6 cursor-pointer focus:outline-none shadow-sm hover:bg-[#ebd73f] transition-colors rounded-xl"
               >
                 Quero ser lojista parceiro
               </button>

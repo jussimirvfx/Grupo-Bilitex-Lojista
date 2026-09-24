@@ -45,18 +45,23 @@ export const Benefits: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -6, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
-              className="bg-white p-6 sm:p-8 space-y-3 text-left border-none shadow-sm transition-all cursor-default"
+              className="h-full"
             >
-              <div className="mb-2">
-                {getIcon(benefit.id)}
-              </div>
-              <h3 className="text-lg font-bold text-black tracking-tight">
-                {benefit.title}
-              </h3>
-              <p className="text-sm text-black/80 leading-relaxed font-normal">
-                {benefit.description}
-              </p>
+              <motion.div
+                whileHover={{ y: -4, scale: 1.015, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="h-full bg-white p-6 sm:p-8 space-y-3 text-left border-none shadow-sm cursor-default rounded-xl"
+              >
+                <div className="mb-2">
+                  {getIcon(benefit.id)}
+                </div>
+                <h3 className="text-lg font-bold text-black tracking-tight">
+                  {benefit.title}
+                </h3>
+                <p className="text-sm text-black/80 leading-relaxed font-normal">
+                  {benefit.description}
+                </p>
+              </motion.div>
             </motion.div>
           ))}
         </div>

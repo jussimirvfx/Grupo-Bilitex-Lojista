@@ -21,17 +21,17 @@ export const Footer: React.FC = () => {
               className="h-8 sm:h-9 md:h-8 lg:h-11 w-auto object-contain"
               referrerPolicy="no-referrer"
             />
-            <div className="flex items-center gap-3 md:gap-3 lg:gap-4 pl-0.5 mt-1">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 pl-0.5 mt-1">
               <img 
                 src="https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/logo-bak-1787778831149.webp" 
                 alt="Bakulelê" 
-                className="h-4 sm:h-5 md:h-4 lg:h-6 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+                className="h-4 sm:h-5 md:h-4 lg:h-6 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity translate-y-1 sm:translate-y-1.5 md:translate-y-1 lg:translate-y-2"
                 referrerPolicy="no-referrer"
               />
               <img 
                 src="https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/logo-2-1787778848299.webp" 
                 alt="Biliton" 
-                className="h-4 sm:h-5 md:h-4 lg:h-6 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+                className="h-7 sm:h-9 md:h-7 lg:h-11 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
                 referrerPolicy="no-referrer"
               />
             </div>

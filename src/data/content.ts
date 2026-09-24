@@ -14,76 +14,80 @@ export const AUTHORITY_METRICS = [
 
 export const BAKULELE_CONTENT = {
   title: "Bakulelê",
+  subtitle: "Moda baby ao infantil",
+  tagline: "Nossa moda é o mundo",
+  benefitsTitle: "Por que ter Bakulelê na sua loja?",
   collection: "Bakulelê",
   ctaText: "Quero revender Bakulelê",
   topics: [
-    "Moda baby e infantil",
-    "Do P ao tamanho 14",
-    "Universo lúdico e contemporâneo",
-    "Peças que unem estilo, conforto e qualidade"
+    "Giro rápido",
+    "Forte apelo visual",
+    "Coleção completa",
+    "Marca consolidada"
   ],
   gallery: [
     {
       id: "bak-1",
       tag: "Foto Bakulelê 01",
       title: "Campanha Rota da Imaginação",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-7-1787830160553.webp",
-      alt: "Foto campanha Bakulelê 01"
+      url: "/bakulele-carrossel-06.png",
+      alt: "Menina com chapéu e calça jeans Bakulelê"
     },
     {
       id: "bak-2",
       tag: "Foto Bakulelê 02",
       title: "Coleção Infantil e Baby",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-1787830160661.webp",
-      alt: "Foto campanha Bakulelê 02"
+      url: "/bakulele-carrossel-05.png",
+      alt: "Menino com camisa branca e bermuda Bakulelê"
     },
     {
       id: "bak-3",
       tag: "Foto Bakulelê 03",
       title: "Acabamentos Lúdicos",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-6-1787830160642.webp",
-      alt: "Detalhe de produto Bakulelê"
+      url: "/bakulele-carrossel-08.png",
+      alt: "Menina com vestido rosa Bakulelê"
     },
     {
       id: "bak-4",
       tag: "Foto Bakulelê 04",
       title: "Coordenação de Vitrine",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-1787830160638.webp",
-      alt: "Look completo Bakulelê"
+      url: "/bakulele-carrossel-04.png",
+      alt: "Menino com camiseta bege e calça jeans Bakulelê"
     },
     {
       id: "bak-5",
       tag: "Foto Bakulelê 05",
       title: "Diversão e Estilo Infantil",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-3-1787830160592.webp",
-      alt: "Foto Bakulelê 05"
+      url: "/bakulele-carrossel-07.png",
+      alt: "Menina com blusa rosa e calça jeans Bakulelê"
     },
     {
       id: "bak-6",
       tag: "Foto Bakulelê 06",
       title: "Conjuntos para o Dia a Dia",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-2-1787830160608.webp",
-      alt: "Foto Bakulelê 06"
+      url: "/bakulele-carrossel-03.png",
+      alt: "Menino com camiseta vermelha e bermuda Bakulelê"
     },
     {
       id: "bak-7",
       tag: "Foto Bakulelê 07",
       title: "Moda Praia e Verão Baby",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-4-1787830160706.webp",
-      alt: "Foto Bakulelê 07"
+      url: "/bakulele-carrossel-02.png",
+      alt: "Menina com camisa branca e saia-shorts Bakulelê"
     },
     {
       id: "bak-8",
       tag: "Foto Bakulelê 08",
       title: "Tendências de Primavera/Verão",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-5-1787830160702.webp",
-      alt: "Foto Bakulelê 08"
+      url: "/bakulele-carrossel-01.png",
+      alt: "Menino com camiseta azul e calça jeans Bakulelê"
     }
   ] as GalleryItem[]
 };
 
 export const BILITON_CONTENT = {
   title: "Biliton",
+  subtitle: "Fashion Denim",
   collection: "Biliton",
   ctaText: "Quero revender Biliton",
   topics: [
@@ -97,68 +101,68 @@ export const BILITON_CONTENT = {
       id: "bil-1",
       tag: "Foto Biliton 01",
       title: "Campanha Paper Dreams Teen",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-13-1787831020815.webp",
-      alt: "Foto campanha Biliton 01"
+      url: "/biliton-carrossel-01.png",
+      alt: "Modelo com camiseta bege e calça jeans Biliton"
     },
     {
       id: "bil-2",
       tag: "Foto Biliton 02",
       title: "Fashion Denim Urbano",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-12-1787831021265.webp",
-      alt: "Foto campanha Biliton 02"
+      url: "/biliton-carrossel-02.png",
+      alt: "Modelo com camisa azul e bermuda Biliton"
     },
     {
       id: "bil-3",
       tag: "Foto Biliton 03",
       title: "Costuras e Lavagens Especiais",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-8-1787831021537.webp",
-      alt: "Detalhe do denim"
+      url: "/biliton-carrossel-03.png",
+      alt: "Modelo com camiseta estampada e shorts jeans Biliton"
     },
     {
       id: "bil-4",
       tag: "Foto Biliton 04",
       title: "Caimento e Conforto Teen",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-10-1787831021507.webp",
-      alt: "Modelagem Biliton"
+      url: "/biliton-carrossel-04.png",
+      alt: "Modelo com camiseta azul e calça jeans Biliton"
     },
     {
       id: "bil-5",
       tag: "Foto Biliton 05",
       title: "Mix de Moda Teen e Jeanswear",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-15-1787831021634.webp",
-      alt: "Look completo Biliton"
+      url: "/biliton-carrossel-05.png",
+      alt: "Modelo com blusa azul e calça branca Biliton"
     },
     {
       id: "bil-6",
       tag: "Foto Biliton 06",
       title: "Streetwear e Atitude Jovem",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-11-1787831021794.webp",
-      alt: "Foto Biliton 06"
+      url: "/biliton-carrossel-06.png",
+      alt: "Modelo com camiseta branca e bermuda jeans Biliton"
     },
     {
       id: "bil-7",
       tag: "Foto Biliton 07",
       title: "Jaquetas e Sobretudo Denim",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-14-1787831021755.webp",
-      alt: "Foto Biliton 07"
+      url: "/biliton-carrossel-07.png",
+      alt: "Modelo com camiseta bege e saia jeans Biliton"
     },
     {
       id: "bil-8",
       tag: "Foto Biliton 08",
       title: "Estilo Urbano Contemporâneo",
-      url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/prancheta-1-copiar-9-1787831021983.webp",
-      alt: "Foto Biliton 08"
+      url: "/biliton-carrossel-08.png",
+      alt: "Modelo com camiseta preta e bermuda jeans Biliton"
     }
   ] as GalleryItem[]
 };
 
 export const ABOUT_CONTENT = {
   title: "Experiência de mercado com atendimento próximo ao lojista",
-  paragraph: "Há 35 anos, o Grupo Bilitex desenvolve moda e constrói relações com lojistas de diferentes regiões do Brasil. Com Bakulelê e Biliton, atendemos do baby ao teen, unindo experiência, qualidade percebida e um time comercial preparado para acompanhar cada parceiro.",
+  paragraph: "Há 35 anos, o Grupo Bilitex desenvolve moda e constrói relações com lojistas de diferentes regiões do Brasil. Com Bakulelê e Biliton, atendemos do baby ao teen, unindo experiência, qualidade percebida e um time comercial preparado para acompanhar cada parceiro de forma personalizada e consultiva. Aqui você e sua loja não são só mais um. É parceria de verdade!",
   image: {
     tag: "Foto institucional / Showroom Grupo Bilitex",
-    url: "https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/chatgpt-image-27-de-ago-de-2026-093540-1787834147034.webp",
-    alt: "Atendimento comercial e estrutura do Grupo Bilitex"
+    url: "/grupo-bilitex-experiencia.png",
+    alt: "Crianças vestindo peças das marcas do Grupo Bilitex"
   }
 };
 
@@ -189,12 +193,12 @@ export const FAQ_CONTENT: FAQItem[] = [
   {
     id: "faq-1",
     question: "Quem pode revender as marcas do Grupo Bilitex?",
-    answer: "Lojas multimarcas, boutiques, lojas de shopping e lojas online com CNPJ podem solicitar uma avaliação comercial."
+    answer: "- Lojas multimarcas;\n- boutiques;\n- lojas de shopping;\n- lojas online.\n\nDesde que tenham CNPJ ativo (como comércio de roupa e similares)."
   },
   {
     id: "faq-4",
     question: "O Grupo Bilitex atende lojistas de todo o Brasil?",
-    answer: "Sim. O grupo possui atendimento nacional por meio da equipe interna e de representantes comerciais."
+    answer: "Sim. O grupo possui atendimento nacional por meio da equipe interna e de representantes comerciais. Agende sua visita conosco para conhecer mais!"
   },
   {
     id: "faq-5",
@@ -209,7 +213,7 @@ export const FAQ_CONTENT: FAQItem[] = [
   {
     id: "faq-8",
     question: "Como funciona o atendimento após o cadastro?",
-    answer: "Os dados são avaliados pela equipe comercial e, quando o perfil estiver alinhado, o lojista será direcionado para o atendimento interno ou para o representante da sua região."
+    answer: "Os dados são avaliados pela equipe comercial e, quando o perfil estiver alinhado, o lojista será direcionado para o atendimento interno ou para o representante da sua região. Você escolhe!"
   }
 ];
 

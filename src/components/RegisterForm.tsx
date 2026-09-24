@@ -179,7 +179,7 @@ export const RegisterForm: React.FC = () => {
       id="cta-form"
       className="relative py-16 sm:py-24 bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{
-        backgroundImage: `url('https://frwfcibbvbj5zog7.public.blob.vercel-storage.com/geral/bilitex-ind-1787832304804.webp')`
+        backgroundImage: `url('/grupo-bilitex-formulario-v2.png')`
       }}
     >
       {/* Preserva links externos antigos para #cadastro. */}
@@ -208,7 +208,7 @@ export const RegisterForm: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
           transition={{ duration: 0.7 }}
-          className="bg-white/80 backdrop-blur-2xl p-6 sm:p-10 text-left shadow-2xl"
+          className="bg-black/55 backdrop-blur-sm p-6 sm:p-10 text-left shadow-2xl rounded-xl"
         >
           
           <AnimatePresence mode="wait">
@@ -239,12 +239,12 @@ export const RegisterForm: React.FC = () => {
                 </motion.div>
                 <div className="space-y-2 max-w-lg mx-auto">
                   {curationBlocked ? (
-                    <p className="text-base text-black/80 whitespace-pre-line">{'Infelizmente, informamos que o seu cadastro não foi selecionado para avançarmos neste momento.\n\nComo nosso processo de entrada passa por uma curadoria interna, não conseguiremos seguir com a parceria agora.\n\nAgradecemos o seu interesse na nossa marca e desejamos muito sucesso!'}</p>
+                    <p className="text-base text-white/80 whitespace-pre-line">{'Infelizmente, informamos que o seu cadastro não foi selecionado para avançarmos neste momento.\n\nComo nosso processo de entrada passa por uma curadoria interna, não conseguiremos seguir com a parceria agora.\n\nAgradecemos o seu interesse na nossa marca e desejamos muito sucesso!'}</p>
                   ) : <>
-                  <h3 className="text-2xl font-bold text-black">
+                  <h3 className="text-2xl font-bold text-white">
                     Solicitação Enviada com Sucesso!
                   </h3>
-                  <p className="text-base text-black/80">
+                  <p className="text-base text-white/80">
                     {FORM_CONTENT.successMessage}
                   </p>
                   </>}
@@ -266,7 +266,7 @@ export const RegisterForm: React.FC = () => {
                   
                   {/* Nome da loja */}
                   <div className="space-y-1.5">
-                    <label htmlFor="storeName" className="block text-xs font-bold uppercase tracking-wider text-black">
+                    <label htmlFor="storeName" className="block text-xs font-bold uppercase tracking-wider text-white">
                       Nome da Loja *
                     </label>
                     <input
@@ -279,9 +279,9 @@ export const RegisterForm: React.FC = () => {
                       value={formData.storeName}
                       onChange={handleChange}
                       placeholder="Ex: Boutique Infantil & Teen"
-                      className={`w-full bg-[#B1AEA7]/10 ${
+                      className={`w-full bg-white/10 ${
                         errors.storeName ? 'ring-1 ring-red-600' : ''
-                      } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
+                      } p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white transition-colors rounded-xl`}
                     />
                     {errors.storeName && (
                       <p id="storeName-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
@@ -292,7 +292,7 @@ export const RegisterForm: React.FC = () => {
 
                   {/* Nome do responsável */}
                   <div className="space-y-1.5">
-                    <label htmlFor="contactName" className="block text-xs font-bold uppercase tracking-wider text-black">
+                    <label htmlFor="contactName" className="block text-xs font-bold uppercase tracking-wider text-white">
                       Nome do Responsável *
                     </label>
                     <input
@@ -305,9 +305,9 @@ export const RegisterForm: React.FC = () => {
                       value={formData.contactName}
                       onChange={handleChange}
                       placeholder="Seu nome completo"
-                      className={`w-full bg-[#B1AEA7]/10 ${
+                      className={`w-full bg-white/10 ${
                         errors.contactName ? 'ring-1 ring-red-600' : ''
-                      } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
+                      } p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white transition-colors rounded-xl`}
                     />
                     {errors.contactName && (
                       <p id="contactName-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
@@ -317,17 +317,17 @@ export const RegisterForm: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-black">E-mail *</label>
+                    <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-white">E-mail *</label>
                     <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange}
                       autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined}
                       placeholder="voce@exemplo.com"
-                      className={`w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black rounded-none ${errors.email ? 'ring-1 ring-red-600' : ''}`} />
+                      className={`w-full bg-white/10 p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white rounded-xl ${errors.email ? 'ring-1 ring-red-600' : ''}`} />
                     {errors.email && <p id="email-error" role="alert" className="text-xs text-red-600">{errors.email}</p>}
                   </div>
 
                   {/* WhatsApp */}
                   <div className="space-y-1.5">
-                    <label htmlFor="whatsapp" className="block text-xs font-bold uppercase tracking-wider text-black">
+                    <label htmlFor="whatsapp" className="block text-xs font-bold uppercase tracking-wider text-white">
                       WhatsApp com DDD *
                     </label>
                     <input
@@ -342,9 +342,9 @@ export const RegisterForm: React.FC = () => {
                       value={formData.whatsapp}
                       onChange={handleChange}
                       placeholder="(00) 90000-0000"
-                      className={`w-full bg-[#B1AEA7]/10 ${
+                      className={`w-full bg-white/10 ${
                         errors.whatsapp ? 'ring-1 ring-red-600' : ''
-                      } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
+                      } p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white transition-colors rounded-xl`}
                     />
                     {errors.whatsapp && (
                       <p id="whatsapp-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
@@ -355,7 +355,7 @@ export const RegisterForm: React.FC = () => {
 
                   {/* CNPJ */}
                   <div className="space-y-1.5">
-                    <label htmlFor="cnpj" className="block text-xs font-bold uppercase tracking-wider text-black">
+                    <label htmlFor="cnpj" className="block text-xs font-bold uppercase tracking-wider text-white">
                       CNPJ da Loja *
                     </label>
                     <input
@@ -372,9 +372,9 @@ export const RegisterForm: React.FC = () => {
                       aria-invalid={Boolean(errors.cnpj)}
                       aria-describedby={errors.cnpj ? 'cnpj-error' : undefined}
                       placeholder="00.000.000/0000-00"
-                      className={`w-full bg-[#B1AEA7]/10 ${
+                      className={`w-full bg-white/10 ${
                         errors.cnpj ? 'ring-1 ring-red-600' : ''
-                      } p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
+                      } p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white transition-colors rounded-xl`}
                     />
                     {errors.cnpj && (
                       <p id="cnpj-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
@@ -385,7 +385,7 @@ export const RegisterForm: React.FC = () => {
 
                   {/* Instagram da loja */}
                   <div className="space-y-1.5">
-                    <label htmlFor="instagram" className="block text-xs font-bold uppercase tracking-wider text-black">
+                    <label htmlFor="instagram" className="block text-xs font-bold uppercase tracking-wider text-white">
                       Instagram da Loja *
                     </label>
                     <input
@@ -398,14 +398,14 @@ export const RegisterForm: React.FC = () => {
                       value={formData.instagram}
                       onChange={handleChange}
                       placeholder="@sualoja"
-                      className={` ${errors.instagram ? "ring-1 ring-red-600" : ""} w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
+                      className={` ${errors.instagram ? "ring-1 ring-red-600" : ""} w-full bg-white/10 p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white transition-colors rounded-xl`}
                     />
                     {errors.instagram && <p id="instagram-error" role="alert" className="text-xs text-red-600">{errors.instagram}</p>}
                   </div>
 
                   {/* Principais marcas já vendidas */}
                   <div className="space-y-1.5">
-                    <label htmlFor="brandsSold" className="block text-xs font-bold uppercase tracking-wider text-black">
+                    <label htmlFor="brandsSold" className="block text-xs font-bold uppercase tracking-wider text-white">
                       Principais Marcas que Já Vende *
                     </label>
                     <input
@@ -418,7 +418,7 @@ export const RegisterForm: React.FC = () => {
                       value={formData.brandsSold}
                       onChange={handleChange}
                       placeholder="Ex: Marca A, Marca B..."
-                      className={` ${errors.brandsSold ? "ring-1 ring-red-600" : ""} w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black transition-colors rounded-none`}
+                      className={` ${errors.brandsSold ? "ring-1 ring-red-600" : ""} w-full bg-white/10 p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white transition-colors rounded-xl`}
                     />
                     {errors.brandsSold && <p id="brandsSold-error" role="alert" className="text-xs text-red-600">{errors.brandsSold}</p>}
                   </div>
@@ -431,10 +431,10 @@ export const RegisterForm: React.FC = () => {
                   { name: 'interestedBrand', label: 'Marca de Interesse Principal', options: brandOptions.map(label => ({ value: label, label })) },
                 ].map(({ name, label, options }) => (
                   <div key={name} className="space-y-1.5">
-                    <label htmlFor={name} className="block text-xs font-bold uppercase tracking-wider text-black">{label} *</label>
+                    <label htmlFor={name} className="block text-xs font-bold uppercase tracking-wider text-white">{label} *</label>
                     <select id={name} name={name} required value={formData[name as keyof RegisterFormData]} onChange={handleChange}
                       aria-invalid={Boolean(errors[name])} aria-describedby={errors[name] ? `${name}-error` : undefined}
-                      className={`w-full bg-[#B1AEA7]/10 p-3.5 sm:p-3 text-base sm:text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-black rounded-none ${errors[name] ? 'ring-1 ring-red-600' : ''}`}>
+                      className={`w-full bg-white/10 p-3.5 sm:p-3 text-base sm:text-sm text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-white rounded-xl [&>option]:text-black ${errors[name] ? 'ring-1 ring-red-600' : ''}`}>
                       <option value="" disabled>Selecionar</option>
                       {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
@@ -447,9 +447,9 @@ export const RegisterForm: React.FC = () => {
                   <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={{ scale: 1.03, backgroundColor: '#333333' }}
+                    whileHover={{ scale: 1.03, backgroundColor: '#1F1F1F' }}
                     whileTap={{ scale: 0.97 }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center bg-black text-white transition-all text-sm font-bold px-10 py-4 uppercase tracking-wider cursor-pointer focus:outline-none disabled:opacity-50 shadow-md"
+                    className="w-full sm:w-auto inline-flex items-center justify-center bg-black text-white transition-all text-sm font-bold px-10 py-4 uppercase tracking-wider cursor-pointer focus:outline-none disabled:opacity-50 shadow-md rounded-xl border border-white/30"
                   >
                     {loading ? 'Processando envio...' : 'Quero ser lojista parceiro'}
                   </motion.button>

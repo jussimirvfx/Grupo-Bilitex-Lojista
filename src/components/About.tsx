@@ -16,7 +16,7 @@ export const About: React.FC = () => {
             transition={{ duration: 0.8, ease: 'easeOut' }}
             className="lg:col-span-6 order-2 lg:order-1"
           >
-            <div className="relative aspect-[4/3] bg-[#B1AEA7]/30 overflow-hidden shadow-lg group">
+            <div className="relative aspect-video bg-[#B1AEA7]/30 overflow-hidden shadow-lg group rounded-xl">
               <img
                 src={ABOUT_CONTENT.image.url}
                 alt={ABOUT_CONTENT.image.alt}
